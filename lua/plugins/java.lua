@@ -9,11 +9,21 @@ return {
       local java_bin = "/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle/bin/java"
       local java_home = "/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle"
 
-      -- Configurar comando jdtls con el ejecutable de Java especificado
+      -- Configurar comando jdtls con el ejecutable de Java y soporte para Lombok
+      local mason_path = vim.fn.stdpath("data") .. "/mason"
+      local lombok_jar = mason_path .. "/share/jdtls/lombok.jar"
+      if not (vim.uv or vim.loop).fs_stat(lombok_jar) then
+        lombok_jar = mason_path .. "/packages/jdtls/lombok.jar"
+      end
+
       opts.cmd = {
-        vim.fn.stdpath("data") .. "/mason/bin/jdtls",
+        mason_path .. "/bin/jdtls",
         "--java-executable=" .. java_bin,
       }
+
+      if (vim.uv or vim.loop).fs_stat(lombok_jar) then
+        table.insert(opts.cmd, string.format("--jvm-arg=-javaagent:%s", lombok_jar))
+      end
 
       -- Ajustes de Java LSP
       opts.settings = vim.tbl_deep_extend("force", opts.settings or {}, {
