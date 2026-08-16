@@ -1,10 +1,41 @@
+---@module "plugins.java"
+--- Configuración del ecosistema Java: LSP (nvim-jdtls) y utilidades de scaffolding (java-creator-nvim)
 return {
+  -- Configuración y personalización del Language Server (JDTLS)
+  {
+    "mfussenegger/nvim-jdtls",
+    opts = function(_, opts)
+      -- Ruta al binario del JDK y ruta home de SDKMAN
+      local java_bin = "/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle/bin/java"
+      local java_home = "/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle"
+
+      -- Configurar comando jdtls con el ejecutable de Java especificado
+      opts.cmd = {
+        vim.fn.stdpath("data") .. "/mason/bin/jdtls",
+        "--java-executable=" .. java_bin,
+      }
+
+      -- Ajustes de Java LSP
+      opts.settings = vim.tbl_deep_extend("force", opts.settings or {}, {
+        java = {
+          home = java_home,
+        },
+      })
+    end,
+  },
+
+  -- Generador de clases, interfaces, records y enums para Java
   {
     "alessio-vivaldelli/java-creator-nvim",
+    ft = "java",
+    event = "VeryLazy",
+    dependencies = {
+      { "rcarriga/nvim-notify", optional = true },
+    },
     config = function()
       require("java-creator-nvim").setup({
         options = {
-          java_version = 17,
+          java_version = 21,
           auto_open = true,
           use_notify = true,
           custom_src_path = "backend/src/main/java",
@@ -27,19 +58,14 @@ return {
           java_record = "<leader>jr",
         },
         default_imports = {
-          record = { "java.util.*" }, -- Import di default per i record
+          record = { "java.util.*" },
         },
       })
 
       vim.keymap.set("i", "<C-space>", 'pumvisible() ? "\\<C-n>" : "\\<C-x>\\<C-u>"', {
         expr = true,
-        desc = "",
+        desc = "Autocompletado omni en modo inserción",
       })
     end,
-    ft = "java",
-    event = "VeryLazy",
-    dependencies = {
-      { "rcarriga/nvim-notify", optional = true },
-    },
   },
 }

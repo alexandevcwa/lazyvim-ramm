@@ -1,30 +1,41 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+-- ============================================================================
+-- Keymaps (Mapeos y Atajos de Teclado)
+-- ============================================================================
+-- Los atajos se cargan automáticamente en el evento 'VeryLazy'.
+-- Atajos predeterminados de LazyVim:
+-- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 
--- ==========================================
--- Antigravity CLI: Atajos y Envíos
--- ==========================================
 local map = vim.keymap.set
-local wk = require("which-key")
 
--- Registrar el menú flotante en Which-Key
-wk.add({
-  { "<leader>a", group = "Antigravity", icon = "🚀" },
-})
+-- ----------------------------------------------------------------------------
+-- Registro de Grupos en Which-Key
+-- ----------------------------------------------------------------------------
+local ok_wk, wk = pcall(require, "which-key")
+if ok_wk then
+  wk.add({
+    { "<leader>a", group = "Antigravity (AGY)", icon = "🚀" },
+    { "<leader>j", group = "Java Creator", icon = "☕" },
+    { "<leader>o", group = "Octo (GitHub)", icon = "🐙" },
+  })
+end
 
--- <leader>af: Analizar el archivo actual en AGY
+-- ============================================================================
+-- Antigravity CLI: Integración de Flujo de Trabajo con IA
+-- ============================================================================
+
+--- Analizar el archivo actual en una terminal flotante de AGY
 map("n", "<leader>af", function()
   local file = vim.fn.expand("%:p")
   if file == "" then
-    vim.notify("No hay un archivo abierto", vim.log.levels.WARN)
+    vim.notify("No hay ningún archivo abierto en el búfer actual", vim.log.levels.WARN, { title = "Antigravity" })
     return
   end
   Snacks.terminal.open("agy run " .. vim.fn.shellescape(file), {
     win = { style = "float", border = "rounded", width = 0.85, height = 0.85 },
   })
-end, { desc = "Analizar archivo actual" })
+end, { desc = "Analizar archivo actual con AGY" })
 
--- <leader>as: Enviar el texto seleccionado a AGY (Modo Visual)
+--- Enviar el texto seleccionado en modo visual directamente a AGY
 map("v", "<leader>as", function()
   vim.cmd('noau normal! "vy')
   local selection = vim.fn.getreg("v")
@@ -32,4 +43,4 @@ map("v", "<leader>as", function()
   Snacks.terminal.open(cmd, {
     win = { style = "float", border = "rounded", width = 0.85, height = 0.85 },
   })
-end, { desc = "Enviar selección a AGY" })
+end, { desc = "Enviar texto seleccionado a AGY" })

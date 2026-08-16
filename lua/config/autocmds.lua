@@ -1,20 +1,20 @@
--- Autocmds are automatically loaded on the VeryLazy event
--- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
---
--- Add any additional autocmds here
--- with `vim.api.nvim_create_autocmd`
---
--- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
--- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+-- ============================================================================
+-- Autocmds (Comandos Automáticos)
+-- ============================================================================
+-- Se cargan automáticamente en el evento 'VeryLazy'.
+-- Autocmds por defecto en LazyVim:
+-- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
 
--- Autorecarga de archivos cuando los subagentes de Antigravity los modifican en segundo plano
--- ==========================================
--- Antigravity CLI: Autorecarga de archivos
--- ==========================================
+-- ============================================================================
+-- Antigravity / Modificaciones Externas: Autorecarga de Búfers
+-- ============================================================================
+-- Recarga automáticamente los archivos cuando herramientas externas o
+-- subagentes de Antigravity los modifican en el sistema de archivos.
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave", "CursorHold" }, {
   group = vim.api.nvim_create_augroup("AgentAutoRead", { clear = true }),
+  desc = "Recarga automática del búfer si el archivo fue modificado externamente",
   callback = function()
-    -- Evitar recargar si el usuario está escribiendo un comando en Neovim
+    -- Evitar recargar si el usuario se encuentra en la línea de comandos de Neovim
     if vim.fn.mode() ~= "c" then
       vim.cmd("checktime")
     end

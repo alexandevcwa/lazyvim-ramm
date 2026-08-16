@@ -1,47 +1,44 @@
+---@module "plugins.octo"
+--- Integración completa con GitHub (Issues, PRs, Revisiones, Notificaciones)
 return {
-
   "pwntester/octo.nvim",
   cmd = "Octo",
   opts = {
-    -- or "fzf-lua" or "snacks" or "default"
-    picker = "snacks",
-    -- bare Octo command opens picker of commands
-    enable_builtin = true,
+    picker = "snacks", -- Utiliza el selector nativo de snacks.nvim de LazyVim
+    enable_builtin = true, -- El comando :Octo abre un menú selector interactivo
   },
   keys = {
     {
       "<leader>oi",
       "<CMD>Octo issue list<CR>",
-      desc = "List GitHub Issues",
+      desc = "Listar Issues de GitHub",
     },
     {
       "<leader>op",
       "<CMD>Octo pr list<CR>",
-      desc = "List GitHub PullRequests",
+      desc = "Listar Pull Requests",
     },
     {
       "<leader>od",
       "<CMD>Octo discussion list<CR>",
-      desc = "List GitHub Discussions",
+      desc = "Listar Discusiones",
     },
     {
       "<leader>on",
       "<CMD>Octo notification list<CR>",
-      desc = "List GitHub Notifications",
+      desc = "Listar Notificaciones de GitHub",
     },
     {
       "<leader>os",
       function()
         require("octo.utils").create_base_search_command({ include_current_repo = true })
       end,
-      desc = "Search GitHub",
+      desc = "Buscar en GitHub (Repo Actual)",
     },
   },
   dependencies = {
     "nvim-lua/plenary.nvim",
-    "nvim-telescope/telescope.nvim",
-    -- OR "ibhagwan/fzf-lua",
-    -- OR "folke/snacks.nvim",
-    "nvim-tree/nvim-web-devicons", -- optional if file_panel.icons is a function
+    "folke/snacks.nvim",
+    "nvim-tree/nvim-web-devicons",
   },
 }
