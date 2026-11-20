@@ -4,10 +4,16 @@ return {
   {
     "navarasu/onedark.nvim",
     priority = 1000, -- Cargar antes que los demás plugins para evitar parpadeos
-    config = function()
-      require("onedark").setup({
-        style = "darker", -- Opciones: 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light'
-      })
+    opts = {
+      style = "darker", -- Opciones: 'dark', 'darker', 'cool', 'deep', 'warm', 'warmer', 'light'
+      transparent = true, -- Permite apreciar la opacidad (0.50) y el blur configurados en Kitty
+      term_colors = true,
+      lualine = {
+        transparent = true,
+      },
+    },
+    config = function(_, opts)
+      require("onedark").setup(opts)
       require("onedark").load()
     end,
   },

@@ -14,9 +14,9 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave", "CursorHo
   group = vim.api.nvim_create_augroup("AgentAutoRead", { clear = true }),
   desc = "Recarga automática del búfer si el archivo fue modificado externamente",
   callback = function()
-    -- Evitar recargar si el usuario se encuentra en la línea de comandos de Neovim
-    if vim.fn.mode() ~= "c" then
-      vim.cmd("checktime")
+    -- Evitar recargar en modo línea de comandos o en la ventana de comandos (q:)
+    if vim.fn.mode() ~= "c" and vim.fn.getcmdwintype() == "" then
+      vim.cmd("silent! checktime")
     end
   end,
 })

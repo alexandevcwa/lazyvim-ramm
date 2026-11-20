@@ -7,3 +7,4 @@ foo.*
 *.log
 data
 db_ui/
+db_ui/

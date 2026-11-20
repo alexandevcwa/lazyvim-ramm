@@ -1,24 +1,18 @@
 ---@module "plugins.dadbod"
---- Configuración de la interfaz de base de datos (vim-dadbod-ui)
+--- Extensión del extra lazyvim.plugins.extras.lang.sql para vim-dadbod-ui
 return {
   "kristijanhusak/vim-dadbod-ui",
-  dependencies = {
-    { "tpope/vim-dadbod", lazy = true },
-    { "kristijanhusak/vim-dadbod-completion", ft = { "sql", "mysql", "plsql" }, lazy = true },
-  },
-  cmd = {
-    "DBUI",
-    "DBUIToggle",
-    "DBUIAddConnection",
-    "DBUIFindBuffer",
-  },
+  optional = true,
   init = function()
-    -- Habilitar iconos Nerd Font en el explorador de base de datos
+    local data_path = vim.fn.stdpath("data")
+    vim.g.db_ui_auto_execute_table_helpers = 1
+    -- Mantener las conexiones y consultas guardadas dentro de ~/.config/nvim/db_ui
+    vim.g.db_ui_save_location = vim.fn.stdpath("config") .. "/db_ui"
+    vim.g.db_ui_show_database_icon = 1
+    vim.g.db_ui_tmp_query_location = data_path .. "/dadbod_ui/tmp"
     vim.g.db_ui_use_nerd_fonts = 1
-
-    -- Directorio personalizado para almacenar consultas SQL guardadas
-    local ok_plenary, plenary_path = pcall(require, "plenary.path")
-    local sep = ok_plenary and plenary_path.path.sep or "/"
-    vim.g.db_ui_save_location = vim.fn.stdpath("config") .. sep .. "db_ui"
+    vim.g.db_ui_use_nvim_notify = 1
+    -- Evitar ejecución accidental de consultas al guardar manualmente un buffer SQL
+    vim.g.db_ui_execute_on_save = 0
   end,
 }

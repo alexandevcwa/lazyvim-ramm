@@ -24,15 +24,14 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
     └── plugins/             # Módulos y plugins personalizados
         ├── antigravity.lua  # Integración y terminal flotante para Antigravity CLI
         ├── auto-save.lua    # Guardado automático inteligente (auto-save.nvim)
-        ├── colorscheme.lua  # Tema visual OneDark (estilo 'darker')
-        ├── dadbod.lua       # Explorador y cliente de bases de datos (vim-dadbod-ui)
-        ├── dashboard.lua    # Banner personalizado en ASCII para Snacks Dashboard
-        ├── java.lua         # LSP Java (JDTLS con SDKMAN + Lombok) y generador de clases
+        ├── colorscheme.lua  # Tema visual OneDark (estilo 'darker', transparente para Kitty)
+        ├── dadbod.lua       # Extensión del extra SQL para vim-dadbod-ui
+        ├── java.lua         # LSP Java (detección dinámica SDKMAN + Lombok) y generador
         ├── live-server.lua  # Servidor local con recarga en vivo (live-server.nvim)
-        ├── lualine.lua      # Barra de estado con indicador en vivo de AGY
+        ├── lualine.lua      # Barra de estado con indicador asíncrono de AGY
         ├── octo.lua         # Gestión de Issues, PRs y Notificaciones de GitHub
-        ├── smear-cursor.lua # Animaciones fluidas del cursor
-        └── snacks.lua       # Configuración del picker de Snacks (archivos ocultos)
+        ├── smear-cursor.lua # Animaciones del cursor (deshabilitadas en Kitty)
+        └── snacks.lua       # Configuración centralizada de Snacks (Dashboard y Picker)
 ```
 
 ---
@@ -44,7 +43,7 @@ Para el funcionamiento completo de todos los módulos:
 1. **Neovim**: `>= 0.10.0` (Probado en `0.12+`).
 2. **Nerd Font**: Requerido para iconos en Lualine, Dadbod UI y Snacks.
 3. **Java & SDKMAN**:
-   - JDK 21 configurado en: `/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle/`
+   - JDK detectado dinámicamente desde `JAVA_HOME`, `$SDKMAN_DIR/candidates/java/current` o `PATH`.
    - Soporte automático para **Lombok** integrado a través de `mason.nvim`.
 4. **Node.js & npm**:
    - Requerido para utilidades web como `live-server`.
@@ -134,8 +133,7 @@ Con [lua/plugins/auto-save.lua](file:///home/rmachicm/.config/nvim/lua/plugins/a
 En [lua/plugins/java.lua](file:///home/rmachicm/.config/nvim/lua/plugins/java.lua), se detecta automáticamente la presencia de `lombok.jar` descargado por Mason y se inyecta como `-javaagent` al iniciar el servidor de lenguaje **JDTLS**, permitiendo el reconocimiento instantáneo de anotaciones como `@Getter`, `@Setter`, `@Builder`, etc.
 
 ### 🔍 Snacks Picker y Dashboard Personalizado
-- **Picker** ([lua/plugins/snacks.lua](file:///home/rmachicm/.config/nvim/lua/plugins/snacks.lua)): Búsqueda de archivos configurada para incluir dotfiles/archivos ocultos (`hidden = true`).
-- **Dashboard** ([lua/plugins/dashboard.lua](file:///home/rmachicm/.config/nvim/lua/plugins/dashboard.lua)): Pantalla de bienvenida personalizada con arte ASCII.
+- **Picker y Dashboard** ([lua/plugins/snacks.lua](file:///home/rmachicm/.config/nvim/lua/plugins/snacks.lua)): Búsqueda de archivos configurada para incluir dotfiles/archivos ocultos (`hidden = true`) y pantalla de bienvenida personalizada con arte ASCII.
 
 ---
 

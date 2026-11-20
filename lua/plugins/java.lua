@@ -1,36 +1,90 @@
 ---@module "plugins.java"
 --- Configuración del ecosistema Java: LSP (nvim-jdtls) y utilidades de scaffolding (java-creator-nvim)
+
+local uv = vim.uv or vim.loop
+
+--- Resuelve dinámicamente el directorio JAVA_HOME activo (env -> SDKMAN current -> PATH)
+---@return string|nil
+local function resolve_java_home()
+  local candidates = {}
+
+  if vim.env.JAVA_HOME and vim.env.JAVA_HOME ~= "" then
+    table.insert(candidates, vim.env.JAVA_HOME)
+  end
+
+  local sdkman_dir = vim.env.SDKMAN_DIR or ((vim.env.HOME or "") .. "/.sdkman")
+  if sdkman_dir ~= "" then
+    table.insert(candidates, sdkman_dir .. "/candidates/java/current")
+  end
+
+  local java_in_path = vim.fn.exepath("java")
+  if java_in_path ~= "" then
+    local real_java = uv.fs_realpath(java_in_path) or java_in_path
+    table.insert(candidates, vim.fn.fnamemodify(real_java, ":h:h"))
+  end
+
+  for _, home in ipairs(candidates) do
+    local real_home = uv.fs_realpath(home) or home
+    if uv.fs_stat(real_home .. "/bin/java") then
+      return real_home
+    end
+  end
+
+  return nil
+end
+
+--- Añade un argumento a cmd solo si ningún elemento existente comienza con el prefijo dado
+---@param cmd string[]
+---@param prefix string
+---@param value string
+local function append_flag_once(cmd, prefix, value)
+  for _, arg in ipairs(cmd) do
+    if vim.startswith(arg, prefix) then
+      return
+    end
+  end
+  table.insert(cmd, prefix .. value)
+end
+
 return {
   -- Configuración y personalización del Language Server (JDTLS)
   {
     "mfussenegger/nvim-jdtls",
+    optional = true,
     opts = function(_, opts)
-      -- Ruta al binario del JDK y ruta home de SDKMAN
-      local java_bin = "/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle/bin/java"
-      local java_home = "/home/rmachicm/.sdkman/candidates/java/21.0.12-oracle"
-
-      -- Configurar comando jdtls con el ejecutable de Java y soporte para Lombok
       local mason_path = vim.fn.stdpath("data") .. "/mason"
-      local lombok_jar = mason_path .. "/share/jdtls/lombok.jar"
-      if not (vim.uv or vim.loop).fs_stat(lombok_jar) then
-        lombok_jar = mason_path .. "/packages/jdtls/lombok.jar"
+      local jdtls_bin = vim.fn.exepath("jdtls")
+      if jdtls_bin == "" then
+        jdtls_bin = mason_path .. "/bin/jdtls"
       end
 
-      opts.cmd = {
-        mason_path .. "/bin/jdtls",
-        "--java-executable=" .. java_bin,
+      opts.cmd = opts.cmd or {}
+      if #opts.cmd == 0 or opts.cmd[1] == "" then
+        opts.cmd[1] = jdtls_bin
+      end
+
+      local java_home = resolve_java_home()
+      if java_home then
+        append_flag_once(opts.cmd, "--java-executable=", java_home .. "/bin/java")
+        opts.settings = vim.tbl_deep_extend("force", opts.settings or {}, {
+          java = {
+            home = java_home,
+          },
+        })
+      end
+
+      local lombok_candidates = {
+        mason_path .. "/share/jdtls/lombok.jar",
+        mason_path .. "/packages/jdtls/lombok.jar",
       }
-
-      if (vim.uv or vim.loop).fs_stat(lombok_jar) then
-        table.insert(opts.cmd, string.format("--jvm-arg=-javaagent:%s", lombok_jar))
+      for _, lombok_jar in ipairs(lombok_candidates) do
+        if uv.fs_stat(lombok_jar) then
+          append_flag_once(opts.cmd, "--jvm-arg=-javaagent:", lombok_jar)
+          break
+        end
       end
 
-      -- Ajustes de Java LSP
-      opts.settings = vim.tbl_deep_extend("force", opts.settings or {}, {
-        java = {
-          home = java_home,
-        },
-      })
+      return opts
     end,
   },
 
@@ -38,44 +92,36 @@ return {
   {
     "alessio-vivaldelli/java-creator-nvim",
     ft = "java",
-    event = "VeryLazy",
     dependencies = {
       { "rcarriga/nvim-notify", optional = true },
     },
-    config = function()
-      require("java-creator-nvim").setup({
-        options = {
-          java_version = 21,
-          auto_open = true,
-          use_notify = true,
-          custom_src_path = "backend/src/main/java",
-          src_patterns = { "src/main/java", "src/test/java", "src" },
-          project_markers = {
-            "pom.xml",
-            "build.gradle",
-            "build.gradle.kts",
-            "settings.gradle",
-            "settings.gradle.kts",
-            ".project",
-          },
-          notification_timeout = 3000,
+    opts = {
+      options = {
+        java_version = 21,
+        auto_open = true,
+        use_notify = true,
+        custom_src_path = "backend/src/main/java",
+        src_patterns = { "src/main/java", "src/test/java", "src" },
+        project_markers = {
+          "pom.xml",
+          "build.gradle",
+          "build.gradle.kts",
+          "settings.gradle",
+          "settings.gradle.kts",
+          ".project",
         },
-        keymaps = {
-          java_new = "<leader>jn",
-          java_class = "<leader>jc",
-          java_interface = "<leader>ji",
-          java_enum = "<leader>je",
-          java_record = "<leader>jr",
-        },
-        default_imports = {
-          record = { "java.util.*" },
-        },
-      })
-
-      vim.keymap.set("i", "<C-space>", 'pumvisible() ? "\\<C-n>" : "\\<C-x>\\<C-u>"', {
-        expr = true,
-        desc = "Autocompletado omni en modo inserción",
-      })
-    end,
+        notification_timeout = 3000,
+      },
+      keymaps = {
+        java_new = "<leader>jn",
+        java_class = "<leader>jc",
+        java_interface = "<leader>ji",
+        java_enum = "<leader>je",
+        java_record = "<leader>jr",
+      },
+      default_imports = {
+        record = { "java.util.*" },
+      },
+    },
   },
 }
