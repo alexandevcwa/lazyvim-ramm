@@ -1,6 +1,6 @@
 # 🚀 Neovim & LazyVim Configuration
 
-Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend (Java / .NET / SQL / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)**.
+Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend (Python / Java / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)**.
 
 ---
 
@@ -25,11 +25,12 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
         ├── antigravity.lua  # Integración y terminal flotante para Antigravity CLI
         ├── auto-save.lua    # Guardado automático inteligente (auto-save.nvim)
         ├── colorscheme.lua  # Tema visual OneDark (estilo 'darker', transparente para Kitty)
-        ├── dadbod.lua       # Extensión del extra SQL para vim-dadbod-ui
         ├── java.lua         # LSP Java (detección dinámica SDKMAN + Lombok) y generador
         ├── live-server.lua  # Servidor local con recarga en vivo (live-server.nvim)
         ├── lualine.lua      # Barra de estado con indicador asíncrono de AGY
         ├── octo.lua         # Gestión de Issues, PRs y Notificaciones de GitHub
+        ├── python.lua       # Ecosistema Python (basedpyright, ruff, debugpy, pytest, neogen)
+        ├── render-markdown.lua # Renderizado enriquecido de Markdown en el búfer
         ├── smear-cursor.lua # Animaciones del cursor (deshabilitadas en Kitty)
         └── snacks.lua       # Configuración centralizada de Snacks (Dashboard y Picker)
 ```
@@ -41,7 +42,7 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
 Para el funcionamiento completo de todos los módulos:
 
 1. **Neovim**: `>= 0.10.0` (Probado en `0.12+`).
-2. **Nerd Font**: Requerido para iconos en Lualine, Dadbod UI y Snacks.
+2. **Nerd Font**: Requerido para iconos en Lualine y Snacks.
 3. **Java & SDKMAN**:
    - JDK detectado dinámicamente desde `JAVA_HOME`, `$SDKMAN_DIR/candidates/java/current` o `PATH`.
    - Soporte automático para **Lombok** integrado a través de `mason.nvim`.
@@ -59,13 +60,19 @@ Para el funcionamiento completo de todos los módulos:
 
 | Extra | Descripción |
 |---|---|
-| `lazyvim.plugins.extras.lang.java` | Soporte completo para Java mediante `nvim-jdtls`, DAP y testing |
-| `lazyvim.plugins.extras.lang.sql` | Integración SQL con `vim-dadbod`, linters (`sqlfluff`) y formateo |
+| `lazyvim.plugins.extras.coding.neogen` | Generación automática de docstrings y anotaciones (`<leader>cn`) |
+| `lazyvim.plugins.extras.coding.yanky` | Historial avanzado de portapapeles y pegado cíclico |
+| `lazyvim.plugins.extras.dap.core` | Depuración integrada con `nvim-dap`, `nvim-dap-ui` y texto virtual |
+| `lazyvim.plugins.extras.editor.refactoring` | Refactorización de código (`extract`, `inline`, debug prints) |
 | `lazyvim.plugins.extras.lang.docker` | Soporte para Dockerfile y Docker Compose |
 | `lazyvim.plugins.extras.lang.dotnet` | Soporte para C# y .NET (Omnisharp/Roslyn) |
+| `lazyvim.plugins.extras.lang.go` | Soporte completo para Go (`gopls`, `gofumpt`, `delve`, `neotest-golang`) |
+| `lazyvim.plugins.extras.lang.java` | Soporte completo para Java mediante `nvim-jdtls`, DAP y testing |
 | `lazyvim.plugins.extras.lang.json` | Soporte de esquemas JSON con `SchemaStore` |
+| `lazyvim.plugins.extras.lang.python` | Soporte profesional para Python (`basedpyright`, `ruff`, `venv-selector`, DAP, Neotest) |
+| `lazyvim.plugins.extras.lang.toml` | Validación, autocompletado y formato para `pyproject.toml` (`taplo`) |
 | `lazyvim.plugins.extras.lang.yaml` | Validación y autocompletado para YAML |
-| `lazyvim.plugins.extras.coding.yanky` | Historial avanzado de portapapeles y pegado cíclico |
+| `lazyvim.plugins.extras.test.core` | Ejecución y depuración de tests con `neotest` + integración con `trouble.nvim` |
 | `lazyvim.plugins.extras.util.mini-hipatterns` | Resaltado de colores hexadecimales e hiperpatrones |
 
 ---
@@ -78,6 +85,21 @@ Para el funcionamiento completo de todos los módulos:
 | `<leader>ag` | Normal / Terminal | Abrir/Cerrar terminal interactiva de **AGY CLI** |
 | `<leader>af` | Normal | Analizar el archivo actual en una ventana flotante de AGY |
 | `<leader>as` | Visual | Enviar el fragmento de código seleccionado a AGY |
+
+### 🐍 Python, Depuración (DAP), Testing (Neotest) y Refactoring
+| Atajo | Modo | Descripción |
+|---|---|---|
+| `<leader>cv` | Normal (Python) | Seleccionar entorno virtual (`venv-selector.nvim`) |
+| `<leader>cn` | Normal | Generar docstring en formato Google (`neogen`) |
+| `<leader>cf` | Normal / Visual | Ordenar imports y formatear con Ruff (`conform.nvim`) |
+| `<leader>db` / `<leader>dB` | Normal | Alternar breakpoint / breakpoint condicional |
+| `<leader>dc` / `<leader>da` | Normal | Iniciar o continuar depuración / ejecutar con argumentos |
+| `<leader>du` / `<leader>de` | Normal / Visual | Alternar DAP UI / evaluar expresión bajo el cursor |
+| `<leader>dPt` / `<leader>dPc` | Normal (Python) | Depurar método o clase de test (`dap-python` + `pytest`) |
+| `<leader>tr` / `<leader>tt` | Normal | Ejecutar test más cercano / todos los tests del archivo (`neotest`) |
+| `<leader>td` | Normal | Depurar el test más cercano con DAP |
+| `<leader>ts` / `<leader>to` | Normal | Panel resumen de tests / ver salida del test |
+| `<leader>rf` / `<leader>rx` | Visual | Extraer función / extraer variable (`refactoring.nvim`) |
 
 ### ☕ Java & Generación de Código (`java-creator-nvim` & `jdtls`)
 | Atajo | Modo | Descripción |
@@ -112,13 +134,6 @@ Para el funcionamiento completo de todos los módulos:
 | `<leader>on` | Normal | Listar Notificaciones de GitHub |
 | `<leader>os` | Normal | Búsqueda global en GitHub dentro del repo |
 
-### 🗄️ Base de Datos (`vim-dadbod-ui`)
-| Atajo | Modo | Descripción |
-|---|---|---|
-| `<leader>D` | Normal | Alternar (Toggle) panel de **DBUI** |
-| `:DBUI` | Comando | Abrir explorador de bases de datos |
-| `<leader>S` | Normal (en buffer SQL) | Ejecutar consulta SQL bajo el cursor |
-
 ---
 
 ## ✨ Características y Ajustes Destacados
@@ -128,6 +143,9 @@ En [lua/config/autocmds.lua](file:///home/rmachicm/.config/nvim/lua/config/autoc
 
 ### 💾 Autoguardado No Intrusivo
 Con [lua/plugins/auto-save.lua](file:///home/rmachicm/.config/nvim/lua/plugins/auto-save.lua), los cambios se guardan automáticamente al salir del modo inserción (`InsertLeave`) o modificar texto (`TextChanged`). Utiliza `noautocmd = true` para evitar disparar formateadores pesados (como Conform) en cada tipeo, manteniendo un flujo de escritura ágil.
+
+### 🐍 Ecosistema Python Profesional (Backend, APIs y Scripting)
+En [lua/plugins/python.lua](file:///home/rmachicm/.config/nvim/lua/plugins/python.lua) y [lua/config/options.lua](file:///home/rmachicm/.config/nvim/lua/config/options.lua), se integra **basedpyright** (tipado estático, *hover* e *inlay hints*) junto con **Ruff** (LSP para diagnósticos/acciones rápidas y `conform.nvim` para `ruff_organize_imports` + `ruff_format`). Además, `nvim-lint` activa **mypy** de forma condicional únicamente cuando el proyecto incluye configuración explícita y un ejecutable en su `.venv`, mientras que `nvim-dap-python` y `neotest-python` quedan listos para trabajar con `debugpy` y `pytest`.
 
 ### ☕ Soporte Java con Lombok
 En [lua/plugins/java.lua](file:///home/rmachicm/.config/nvim/lua/plugins/java.lua), se detecta automáticamente la presencia de `lombok.jar` descargado por Mason y se inyecta como `-javaagent` al iniciar el servidor de lenguaje **JDTLS**, permitiendo el reconocimiento instantáneo de anotaciones como `@Getter`, `@Setter`, `@Builder`, etc.

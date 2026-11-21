@@ -5,6 +5,10 @@
 -- Opciones predeterminadas de LazyVim:
 -- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 
+-- Ecosistema Python (leído por lazyvim.plugins.extras.lang.python)
+vim.g.lazyvim_python_lsp = "basedpyright"
+vim.g.lazyvim_python_ruff = "ruff"
+
 -- Opciones personalizadas adicionales
 -- local opt = vim.opt
 -- opt.relativenumber = true -- Números de línea relativos (ya activo por defecto en LazyVim)
