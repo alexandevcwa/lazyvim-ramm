@@ -11,11 +11,19 @@
 local ok_wk, wk = pcall(require, "which-key")
 if ok_wk then
   wk.add({
+    -- Grupo principal y submenú de Antigravity (AGY) con iconos en Which-Key
     { "<leader>a", group = "Antigravity (AGY)", icon = "🚀", mode = { "n", "x" } },
+    { "<leader>ag", desc = "Toggle Terminal AGY CLI", icon = "🖥️", mode = "n" },
+    { "<leader>ae", desc = "Editar selección/línea con comentario (AGY)", icon = "✏️", mode = { "n", "x" } },
+    { "<leader>aa", desc = "Preguntar a AGY sobre selección/línea", icon = "💬", mode = { "n", "x" } },
+    { "<leader>af", desc = "Enviar archivo actual a AGY", icon = "📄", mode = "n" },
+    { "<leader>ad", desc = "Corregir diagnósticos LSP actuales con AGY", icon = "🩺", mode = "n" },
+
+    -- Otros grupos personalizados
     { "<leader>j", group = "Java Creator", icon = "☕" },
     { "<leader>o", group = "Octo (GitHub)", icon = "🐙" },
   })
 end
 
--- Nota: los atajos de Antigravity (<leader>ag, <leader>af, <leader>as) se definen
--- junto a su integración con snacks.nvim en lua/plugins/antigravity.lua.
+-- Nota: los atajos de Antigravity (<leader>ag, <leader>ae, <leader>aa, <leader>af, <leader>ad)
+-- se definen junto a su integración con snacks.nvim en lua/plugins/antigravity.lua.
