@@ -1,6 +1,6 @@
 # 🚀 Neovim & LazyVim Configuration
 
-Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend (Python / Java / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)**.
+Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend (Python / Java / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)** y **Kiro CLI**.
 
 ---
 
@@ -26,6 +26,7 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
         ├── auto-save.lua    # Guardado automático inteligente (auto-save.nvim)
         ├── colorscheme.lua  # Tema visual OneDark (estilo 'darker', transparente para Kitty)
         ├── java.lua         # LSP Java (detección dinámica SDKMAN + Lombok) y generador
+        ├── kiro.lua         # Integración y terminal flotante para Kiro CLI (+ indicador en Lualine)
         ├── live-server.lua  # Servidor local con recarga en vivo (live-server.nvim)
         ├── lualine.lua      # Barra de estado con indicador asíncrono de AGY
         ├── octo.lua         # Gestión de Issues, PRs y Notificaciones de GitHub
@@ -86,6 +87,19 @@ Para el funcionamiento completo de todos los módulos:
 | `<leader>af` | Normal | Analizar el archivo actual en una ventana flotante de AGY |
 | `<leader>as` | Visual | Enviar el fragmento de código seleccionado a AGY |
 
+### 🤖 Kiro CLI
+Integración independiente de Antigravity (`lua/plugins/kiro.lua`). Usa una terminal flotante propia con `kiro-cli chat --trust-workspace` (confía en el proyecto abierto en Neovim) y no fija `--agent` ni `--model`: se usan los valores por defecto de la herramienta.
+
+| Atajo | Modo | Descripción |
+|---|---|---|
+| `<leader>kk` | Normal / Terminal | Abrir/Cerrar terminal interactiva de **Kiro CLI** |
+| `<leader>ke` | Normal / Visual | Editar la selección o línea actual con una instrucción |
+| `<leader>ka` | Normal / Visual | Preguntar a Kiro sobre la selección o línea actual |
+| `<leader>kf` | Normal | Enviar el archivo actual (instrucción opcional) |
+| `<leader>kd` | Normal | Enviar los diagnósticos LSP del archivo para su corrección |
+| `<leader>kr` | Normal | Abrir Kiro reanudando la última conversación del directorio (`--resume`) |
+
+Lualine muestra `🤖 Kiro` mientras la sesión de Kiro está activa. Los cambios que Kiro haga en disco se recargan con el autocmd `AgentAutoRead`.
 ### 🐍 Python, Depuración (DAP), Testing (Neotest) y Refactoring
 | Atajo | Modo | Descripción |
 |---|---|---|

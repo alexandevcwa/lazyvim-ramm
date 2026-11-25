@@ -3,6 +3,7 @@
 return {
   "sphamba/smear-cursor.nvim",
   event = "VeryLazy",
+  enabled = false,
   cond = function()
     -- Kitty ya provee cursor_trail acelerado por GPU; activar ambos genera doble estela y parpadeos
     return vim.env.KITTY_WINDOW_ID == nil and vim.env.KITTY_PID == nil and vim.env.TERM ~= "xterm-kitty"
