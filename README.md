@@ -1,6 +1,6 @@
 # 🚀 Neovim & LazyVim Configuration
 
-Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend y de sistemas (**Rust** / Python / Java / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)** y **Kiro CLI**.
+Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend y de sistemas (**Rust** / **Java & Spring Boot** / **Python** / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)** y **Kiro CLI**.
 
 ---
 
@@ -22,19 +22,19 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
     │   └── autocmds.lua     # Comandos automáticos (recarga en segundo plano, etc.)
     │
     └── plugins/             # Módulos y plugins personalizados
-        ├── antigravity.lua  # Integración y terminal flotante para Antigravity CLI
+        ├── antigravity.lua  # Integración dual (flotante/split) para Antigravity CLI (agy)
         ├── auto-save.lua    # Guardado automático inteligente (auto-save.nvim)
-        ├── colorscheme.lua  # Tema visual OneDark (estilo 'darker', transparente para Kitty)
-        ├── java.lua         # LSP Java (detección dinámica SDKMAN + Lombok) y generador
+        ├── colorscheme.lua  # Esquema de color principal (bamboo.nvim)
+        ├── java.lua         # Ecosistema Java & Spring Boot (JDTLS, STS4, Motor .env, DAP, Neotest, Initializr)
         ├── kiro.lua         # Integración y terminal flotante para Kiro CLI (+ indicador en Lualine)
         ├── live-server.lua  # Servidor local con recarga en vivo (live-server.nvim)
-        ├── lualine.lua      # Barra de estado con indicador asíncrono de AGY
+        ├── lualine.lua      # Barra de estado con indicador asíncrono de AGY y Kiro
         ├── octo.lua         # Gestión de Issues, PRs y Notificaciones de GitHub
         ├── python.lua       # Ecosistema Python (basedpyright, ruff, debugpy, pytest, neogen)
         ├── render-markdown.lua # Renderizado enriquecido de Markdown en el búfer
         ├── rust.lua         # Ecosistema Rust (rustaceanvim, crates.nvim, codelldb, neotest y blindajes)
         ├── smear-cursor.lua # Animaciones del cursor (deshabilitadas en Kitty)
-        └── snacks.lua       # Configuración centralizada de Snacks (Dashboard y Picker)
+        └── snacks.lua       # Configuración centralizada de Snacks (Dashboard, Explorer y Picker)
 ```
 
 ---
@@ -44,18 +44,19 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
 Para el funcionamiento completo de todos los módulos:
 
 1. **Neovim**: `>= 0.10.0` (Probado en `0.12+`).
-2. **Nerd Font**: Requerido para iconos en Lualine y Snacks.
+2. **Nerd Font**: Requerido para iconos en Lualine, Which-Key y Snacks.
 3. **Rust & Cargo (`rustup`)**:
    - Toolchain `stable` con `rustc`, `cargo`, `clippy`, `rustfmt` y `rust-src`.
    - `rust-analyzer` instalado vía `rustup component add rust-analyzer` (nunca desde Mason para evitar incompatibilidades de ABI en *proc-macros*).
    - `codelldb` gestionado automáticamente mediante `mason.nvim` para depuración DAP; opcionalmente `cargo-nextest` para ejecución paralela de tests.
-4. **Java & SDKMAN**:
-   - JDK detectado dinámicamente desde `JAVA_HOME`, `$SDKMAN_DIR/candidates/java/current` o `PATH`.
-   - Soporte automático para **Lombok** integrado a través de `mason.nvim`.
+4. **Java, Spring Boot & SDKMAN**:
+   - JDK principal detectado dinámicamente desde `JAVA_HOME`, `$SDKMAN_DIR/candidates/java/current` (ej. Java 21 LTS) o `PATH`, con descubrimiento automático de múltiples JDKs instalados en `~/.sdkman/candidates/java/*`.
+   - Herramientas gestionadas automáticamente vía `mason.nvim`: `jdtls` (con soporte automático para **Lombok**), `vscode-spring-boot-tools` (Spring Tools 4 LSP), `java-debug-adapter`, `java-test` y `google-java-format`.
+   - `curl` y `unzip` instalados en el sistema para la generación de proyectos desde `start.spring.io` con `spring-initializr.nvim`.
 5. **Node.js & npm**:
    - Requerido para utilidades web como `live-server`.
-6. **Antigravity CLI (`agy`)**:
-   - Instalado en `$PATH` para comandos interactivos y análisis de código.
+6. **Antigravity CLI (`agy`) & Kiro CLI (`kiro-cli`)**:
+   - Disponibles en `$PATH` para sesiones interactivas de IA, edición contextual y análisis de diagnósticos LSP.
 7. **GitHub CLI (`gh`)**:
    - Autenticado (`gh auth login`) para el funcionamiento de `octo.nvim`.
 8. **StyLua / Formatters**: Gestionados automáticamente mediante `mason.nvim` y `conform.nvim`.
@@ -86,15 +87,22 @@ Para el funcionamiento completo de todos los módulos:
 
 ## ⌨️ Guía de Atajos de Teclado (Cheat Sheet)
 
-### 🚀 Antigravity (AGY CLI)
+### 🚀 Antigravity (`agy` CLI — `lua/plugins/antigravity.lua`)
 | Atajo | Modo | Descripción |
 |---|---|---|
-| `<leader>ag` | Normal / Terminal | Abrir/Cerrar terminal interactiva de **AGY CLI** |
-| `<leader>af` | Normal | Analizar el archivo actual en una ventana flotante de AGY |
-| `<leader>as` | Visual | Enviar el fragmento de código seleccionado a AGY |
+| `<leader>ag` | Normal / Terminal | Mostrar / Ocultar terminal **AGY Flotante** |
+| `<leader>av` | Normal / Terminal | Mostrar / Ocultar terminal **AGY en Split Lateral Derecho** |
+| `<leader>ae` | Normal / Visual | Editar selección o línea actual con instrucción en AGY |
+| `<leader>aa` | Normal / Visual | Preguntar a AGY sobre la selección o línea actual |
+| `<leader>at` | Normal / Visual | Generar y ejecutar tests unitarios para la selección o función |
+| `<leader>af` | Normal | Enviar el archivo actual completo a AGY (con instrucción opcional) |
+| `<leader>ad` | Normal | Enviar diagnósticos LSP activos ordenados por severidad a AGY |
+| `<leader>aq` | Normal | Enviar elementos de la lista Quickfix o todos los búferes abiertos |
+| `<leader>ar` | Normal | Menú de flujos Git con AGY (*Code Review* de diff, *Conventional Commit*, conflictos) |
+| `<leader>as` | Normal / Visual | Selector interactivo de *Slash Commands* (`/plan`, `/boost`, `/grill-me`, `/goal`...) |
 
-### 🤖 Kiro CLI
-Integración independiente de Antigravity (`lua/plugins/kiro.lua`). Usa una terminal flotante propia con `kiro-cli chat --trust-workspace` (confía en el proyecto abierto en Neovim) y no fija `--agent` ni `--model`: se usan los valores por defecto de la herramienta.
+### 🤖 Kiro CLI (`lua/plugins/kiro.lua`)
+Integración independiente de Antigravity. Usa una terminal flotante propia (`count = 2`) con `kiro-cli chat --trust-workspace` y muestra el indicador `🤖 Kiro` en Lualine mientras la sesión está activa.
 
 | Atajo | Modo | Descripción |
 |---|---|---|
@@ -105,7 +113,29 @@ Integración independiente de Antigravity (`lua/plugins/kiro.lua`). Usa una term
 | `<leader>kd` | Normal | Enviar los diagnósticos LSP del archivo para su corrección |
 | `<leader>kr` | Normal | Abrir Kiro reanudando la última conversación del directorio (`--resume`) |
 
-Lualine muestra `🤖 Kiro` mientras la sesión de Kiro está activa. Los cambios que Kiro haga en disco se recargan con el autocmd `AgentAutoRead`.
+### ☕ Java & Spring Boot (`nvim-jdtls`, `spring-boot.nvim`, Motor `.env`, `spring-initializr.nvim`)
+| Atajo | Modo | Descripción |
+|---|---|---|
+| `<leader>jr` | Normal | **▶️ Ejecutar Spring Boot (`spring-boot:run` / `bootRun`) con carga automática de `.env`** |
+| `<leader>jp` | Normal | **🌱 Ejecutar Spring Boot seleccionando Perfil (`SPRING_PROFILES_ACTIVE`) + `.env`** |
+| `<leader>jd` | Normal | **🐞 Depurar Spring Boot (DAP) con inyección automática de variables `.env`** |
+| `<leader>js` | Normal / Terminal | Mostrar / Ocultar la consola inferior de Spring Boot |
+| `<leader>jS` | Normal | Detener el proceso activo de Spring Boot |
+| `<leader>je` | Normal | **🔐 Inspeccionar variables `.env` detectadas** (enmascara secretos automáticamente) |
+| `<leader>jo` | Normal | **📄 Abrir (o crear) el archivo `.env`** en la raíz del proyecto |
+| `<leader>jm` | Normal | **🔨 Ejecutar tareas Maven / Gradle** (`clean compile`, `test`, `package`, etc.) con `.env` |
+| `<leader>jI` | Normal | **🌱 Abrir Spring Initializr TUI** (`:SpringInitializr`) para configurar un nuevo proyecto |
+| `<leader>jG` | Normal | **🏗️ Generar y descargar proyecto Spring Boot** (`:SpringGenerateProject`) |
+| `<leader>jO` / `<leader>co` | Normal (`.java`) | Organizar imports con JDTLS (sin colapsar en `import *`) |
+| `<leader>ju` | Normal (`.java`) | Actualizar configuración del proyecto Maven/Gradle en JDTLS |
+| `<leader>jt` / `<leader>jT` | Normal (`.java`) | Depurar método de test bajo el cursor / clase de test completa (JDTLS + `.env`) |
+| `<leader>tr` / `<leader>tt` / `<leader>td` | Normal (`.java`) | Ejecutar test cercano / archivo / depurar test con Neotest (`neotest-java`) |
+| `<leader>jn` | Normal (`.java`) | Menú general de nuevo artefacto Java (`java-creator-nvim`) |
+| `<leader>jc` / `<leader>ji` | Normal (`.java`) | Crear nueva `Class` / nueva `Interface` |
+| `<leader>jR` / `<leader>jE` | Normal (`.java`) | Crear nuevo `Record` / nuevo `Enum` |
+| `<leader>cn` | Normal (`.java`) | Generar comentario de documentación Javadoc (`neogen`) |
+| `<leader>cxv` / `<leader>cxc` | Normal / Visual | Extraer variable / extraer constante (JDTLS) |
+| `<leader>cxm` | Visual | Extraer método (JDTLS) |
 
 ### 🦀 Rust & Gestión de Crates (`rustaceanvim` & `crates.nvim`)
 | Atajo | Modo | Descripción |
@@ -146,19 +176,6 @@ Lualine muestra `🤖 Kiro` mientras la sesión de Kiro está activa. Los cambio
 | `<leader>ts` / `<leader>to` | Normal | Panel resumen de tests / ver salida del test |
 | `<leader>rf` / `<leader>rx` | Visual | Extraer función / extraer variable (`refactoring.nvim`) |
 
-### ☕ Java & Generación de Código (`java-creator-nvim` & `jdtls`)
-| Atajo | Modo | Descripción |
-|---|---|---|
-| `<leader>jn` | Normal | Crear un nuevo archivo/clase Java interactivamente |
-| `<leader>jc` | Normal | Crear nueva `Class` |
-| `<leader>ji` | Normal | Crear nueva `Interface` |
-| `<leader>je` | Normal | Crear nuevo `Enum` |
-| `<leader>jr` | Normal | Crear nuevo `Record` |
-| `<leader>co` | Normal | Organizar imports con JDTLS |
-| `<leader>cxv` | Normal / Visual | Extraer variable |
-| `<leader>cxc` | Normal / Visual | Extraer constante |
-| `<leader>cxm` | Visual | Extraer método |
-
 ### 🌐 Live Server (`live-server.nvim`)
 | Atajo | Modo | Descripción |
 |---|---|---|
@@ -189,6 +206,34 @@ En [lua/config/autocmds.lua](file:///home/rmachicm/.config/nvim/lua/config/autoc
 ### 💾 Autoguardado No Intrusivo
 Con [lua/plugins/auto-save.lua](file:///home/rmachicm/.config/nvim/lua/plugins/auto-save.lua), los cambios se guardan automáticamente al salir del modo inserción (`InsertLeave`) o modificar texto (`TextChanged`). Utiliza `noautocmd = true` para evitar disparar formateadores pesados (como Conform) en cada tipeo, manteniendo un flujo de escritura ágil.
 
+### ☕ Ecosistema Profesional de Java, Spring Boot y Motor Nativo de `.env`
+En [lua/plugins/java.lua](file:///home/rmachicm/.config/nvim/lua/plugins/java.lua), se configura una suite integral para desarrollo empresarial con **Java 21+** y **Spring Boot**:
+1. **LSP Avanzado (`mfussenegger/nvim-jdtls`) + Multi-JDK (SDKMAN)**:
+   - Resuelve dinámicamente `JAVA_HOME` (priorizando `vim.env.JAVA_HOME`, `$SDKMAN_DIR/candidates/java/current` y `PATH`) y escanea `~/.sdkman/candidates/java/*` para registrar automáticamente todos los JDKs instalados en `java.configuration.runtimes`.
+   - Inyecta `lombok.jar` (`-javaagent`), optimiza la JVM (`-Xmx4G`, `-XX:+UseG1GC`), activa *Inlay Hints* de nombres de parámetros, evita imports comodín (`starThreshold = 9999`) y preconfigura *static imports* favoritos para **JUnit 5, AssertJ, Mockito y Spring MockMvc**.
+2. **Spring Tools 4 Oficial (`JavaHello/spring-boot.nvim`)**:
+   - Conecta `vscode-spring-boot-tools` con JDTLS para ofrecer autocompletado, validación y documentación en `application.properties` y `application.yml`, además de navegación inteligente por anotaciones y beans de Spring (`@RestController`, `@Bean`, `@Value`, etc.).
+3. **Motor Nativo de Carga Automática de `.env`**:
+   - **Lectura en caliente**: Busca y fusiona automáticamente `.env`, `.env.local` y `.env.<profile>` tanto en la raíz del proyecto como en subdirectorios `backend/`. Soporta `export KEY=VAL`, comentarios `#`, comillas simples/dobles e interpolación `${VAR}`.
+   - **Inyección transparente en `nvim-dap`**: Un hook en `dap.listeners.on_config` intercepta cualquier sesión de depuración Java (`<leader>dc`, `<leader>jd`, `<leader>jt`) e inyecta todas las variables del `.env` directamente en el proceso JVM.
+   - **Spring Boot Runner en `Snacks.terminal`**: Ejecuta `./mvnw spring-boot:run` o `./gradlew bootRun` en una consola dedicada inyectando tanto las variables del `.env` como el `JAVA_HOME` activo.
+4. **Testing, Scaffolding y Spring Initializr**:
+   - **Testing**: `rcasia/neotest-java` integrado en `neotest` (`<leader>tr`, `<leader>tt`, `<leader>td`) + runners de JDTLS (`<leader>jt`, `<leader>jT`).
+   - **Spring Initializr**: Interfaz TUI con `jkeresman01/spring-initializr.nvim` (`<leader>jI` para configurar dependencias desde `start.spring.io` y `<leader>jG` para generar el proyecto).
+   - **Scaffolding & Javadoc**: `java-creator-nvim` con detección automática de estructuras estándar (`src/main/java`) o monorepo (`backend/src/main/java`), y generación de Javadoc con `neogen` (`<leader>cn`).
+
+#### ▶️ Flujo Rápido para Crear, Ejecutar y Depurar un Proyecto Spring Boot (con `.env`)
+1. **Crear un proyecto nuevo desde Neovim**: Presiona **`<leader>jI`** (`:SpringInitializr`), selecciona versión de Spring Boot, Java, metadatos y dependencias, y luego presiona **`<leader>jG`** (`:SpringGenerateProject`) para descargarlo en tu directorio actual.
+2. **Configurar y verificar variables `.env`**:
+   - Presiona **`<leader>jo`** para abrir o crear el archivo `.env` en la raíz del proyecto.
+   - Presiona **`<leader>je`** en cualquier momento para inspeccionar qué archivos `.env` y qué variables están siendo detectadas (las claves con `SECRET`, `PASSWORD`, `TOKEN` o `KEY` se muestran enmascaradas).
+3. **Arrancar Spring Boot con `.env`**:
+   - **Arranque directo**: Presiona **`<leader>jr`** para iniciar `spring-boot:run` o `bootRun` con todas las variables del `.env` inyectadas.
+   - **Arranque por perfil**: Presiona **`<leader>jp`** para elegir el perfil activo (`dev`, `local`, `test`, `staging`, `prod` o personalizado); Neovim definirá `SPRING_PROFILES_ACTIVE` y cargará además `.env.<perfil>` si existe.
+   - **Control de consola**: Usa **`<leader>js`** para ocultar/mostrar la consola de Spring Boot y **`<leader>jS`** para detener el servidor.
+4. **Depurar paso a paso con `.env` (`nvim-dap`)**:
+   - Coloca un breakpoint con **`<leader>db`** y presiona **`<leader>jd`** (o **`<leader>dc`**). Neovim descubrirá la clase `@SpringBootApplication`, inyectará las variables del `.env` en la JVM y abrirá `nvim-dap-ui`.
+
 ### 🐍 Ecosistema Python Profesional (Backend, APIs y Scripting)
 En [lua/plugins/python.lua](file:///home/rmachicm/.config/nvim/lua/plugins/python.lua) y [lua/config/options.lua](file:///home/rmachicm/.config/nvim/lua/config/options.lua), se integra **basedpyright** (tipado estático, *hover* e *inlay hints*) junto con **Ruff** (LSP para diagnósticos/acciones rápidas y `conform.nvim` para `ruff_organize_imports` + `ruff_format`). Además, `nvim-lint` activa **mypy** de forma condicional únicamente cuando el proyecto incluye configuración explícita y un ejecutable en su `.venv`, mientras que `nvim-dap-python` y `neotest-python` quedan listos para trabajar con `debugpy` y `pytest`.
 
@@ -206,11 +251,11 @@ En [lua/plugins/rust.lua](file:///home/rmachicm/.config/nvim/lua/plugins/rust.lu
      - Para depurar un `#[test]` específico: coloca el cursor dentro del test y presiona **`<leader>td`**.
    - **Paso 3 (Navegar y evaluar en vivo)**: Se abrirá automáticamente `nvim-dap-ui` con los valores en línea (*virtual text*). Usa **`<leader>dO`** (*Step Over* / siguiente línea), **`<leader>di`** (*Step Into* / entrar a función), **`<leader>do`** (*Step Out* / salir de función), **`<leader>dc`** (*Continue*), **`<leader>de`** (evaluar variable/expresión bajo el cursor) y **`<leader>dt`** (terminar sesión).
 
-### ☕ Soporte Java con Lombok
-En [lua/plugins/java.lua](file:///home/rmachicm/.config/nvim/lua/plugins/java.lua), se detecta automáticamente la presencia de `lombok.jar` descargado por Mason y se inyecta como `-javaagent` al iniciar el servidor de lenguaje **JDTLS**, permitiendo el reconocimiento instantáneo de anotaciones como `@Getter`, `@Setter`, `@Builder`, etc.
-
-### 🔍 Snacks Picker y Dashboard Personalizado
-- **Picker y Dashboard** ([lua/plugins/snacks.lua](file:///home/rmachicm/.config/nvim/lua/plugins/snacks.lua)): Búsqueda de archivos configurada para incluir dotfiles/archivos ocultos (`hidden = true`) y pantalla de bienvenida personalizada con arte ASCII.
+### 🔍 Snacks Picker, Explorer y Dashboard Personalizado
+En [lua/plugins/snacks.lua](file:///home/rmachicm/.config/nvim/lua/plugins/snacks.lua):
+- **Explorador lateral (`<leader>e`)**: Oculta archivos ignorados por defecto pero mantiene una lista blanca (`include`) que muestra siempre dotfiles esenciales de configuración como **`.env*`**, `.cargo`, `.github`, `.gitignore` y `.dockerignore`.
+- **Buscador de archivos (`<leader><space>`)**: Muestra dotfiles (`hidden = true`) excluyendo directorios de caché, entornos virtuales y artefactos de compilación o metadatos de IDE (`target`, `build`, `.gradle`, `.settings`, `.classpath`, `.project`, `.factorypath`, `node_modules`, `.venv`).
+- **Dashboard**: Pantalla de bienvenida personalizada con arte ASCII.
 
 ---
 

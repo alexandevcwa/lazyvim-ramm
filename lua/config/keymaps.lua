@@ -20,7 +20,7 @@ if ok_wk then
     { "<leader>ad", desc = "Corregir diagnósticos LSP actuales con AGY", icon = "🩺", mode = "n" },
 
     -- Otros grupos personalizados
-    { "<leader>j", group = "Java Creator", icon = "☕" },
+    { "<leader>j", group = "Java / Spring Boot", icon = "☕" },
     { "<leader>o", group = "Octo (GitHub)", icon = "🐙" },
     { "<leader>R", group = "Rust / Cargo", icon = "🦀", mode = { "n", "v" } },
   })
