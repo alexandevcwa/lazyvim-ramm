@@ -72,12 +72,6 @@ local function agy_term_opts(layout)
     }
   end
 
-  win_opts.keys = {
-    hide_agy_slash = { "<C-/>", "hide", desc = "Ocultar AGY", mode = { "t", "n" } },
-    hide_agy_underscore = { "<C-_>", "hide", desc = "Ocultar AGY", mode = { "t", "n" } },
-    hide_agy_q = { "q", "hide", desc = "Ocultar AGY", mode = "n" },
-  }
-
   win_opts.on_win = function(win)
     vim.api.nvim_create_autocmd({ "BufLeave", "WinLeave", "WinClosed" }, {
       buffer = win.buf,
