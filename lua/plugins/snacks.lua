@@ -25,6 +25,7 @@ return {
           hidden = false,
           ignored = false,
           include = {
+            ".cargo",
             ".env*",
             ".gitignore",
             ".dockerignore",
@@ -56,6 +57,7 @@ return {
             ".ruff_cache",
             ".venv",
             "node_modules",
+            "target",
           },
         },
       },

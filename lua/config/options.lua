@@ -9,6 +9,9 @@
 vim.g.lazyvim_python_lsp = "basedpyright"
 vim.g.lazyvim_python_ruff = "ruff"
 
+-- Ecosistema Rust (leído por lazyvim.plugins.extras.lang.rust)
+vim.g.lazyvim_rust_diagnostics = "rust-analyzer"
+
 -- Opciones personalizadas adicionales
 -- local opt = vim.opt
 -- opt.relativenumber = true -- Números de línea relativos (ya activo por defecto en LazyVim)

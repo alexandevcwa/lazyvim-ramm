@@ -22,6 +22,7 @@ if ok_wk then
     -- Otros grupos personalizados
     { "<leader>j", group = "Java Creator", icon = "☕" },
     { "<leader>o", group = "Octo (GitHub)", icon = "🐙" },
+    { "<leader>R", group = "Rust / Cargo", icon = "🦀", mode = { "n", "v" } },
   })
 end
 

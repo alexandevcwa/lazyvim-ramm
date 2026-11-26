@@ -1,6 +1,6 @@
 # 🚀 Neovim & LazyVim Configuration
 
-Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend (Python / Java / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)** y **Kiro CLI**.
+Configuración personalizada de **Neovim** basada en la distribución moderna y modular **[LazyVim](https://lazyvim.github.io/)**, optimizada para desarrollo backend y de sistemas (**Rust** / Python / Java / Go / .NET / Docker), frontend/web (Live Server), integración con GitHub y asistencia por inteligencia artificial mediante **Antigravity CLI (AGY)** y **Kiro CLI**.
 
 ---
 
@@ -32,6 +32,7 @@ Configuración personalizada de **Neovim** basada en la distribución moderna y 
         ├── octo.lua         # Gestión de Issues, PRs y Notificaciones de GitHub
         ├── python.lua       # Ecosistema Python (basedpyright, ruff, debugpy, pytest, neogen)
         ├── render-markdown.lua # Renderizado enriquecido de Markdown en el búfer
+        ├── rust.lua         # Ecosistema Rust (rustaceanvim, crates.nvim, codelldb, neotest y blindajes)
         ├── smear-cursor.lua # Animaciones del cursor (deshabilitadas en Kitty)
         └── snacks.lua       # Configuración centralizada de Snacks (Dashboard y Picker)
 ```
@@ -44,16 +45,20 @@ Para el funcionamiento completo de todos los módulos:
 
 1. **Neovim**: `>= 0.10.0` (Probado en `0.12+`).
 2. **Nerd Font**: Requerido para iconos en Lualine y Snacks.
-3. **Java & SDKMAN**:
+3. **Rust & Cargo (`rustup`)**:
+   - Toolchain `stable` con `rustc`, `cargo`, `clippy`, `rustfmt` y `rust-src`.
+   - `rust-analyzer` instalado vía `rustup component add rust-analyzer` (nunca desde Mason para evitar incompatibilidades de ABI en *proc-macros*).
+   - `codelldb` gestionado automáticamente mediante `mason.nvim` para depuración DAP; opcionalmente `cargo-nextest` para ejecución paralela de tests.
+4. **Java & SDKMAN**:
    - JDK detectado dinámicamente desde `JAVA_HOME`, `$SDKMAN_DIR/candidates/java/current` o `PATH`.
    - Soporte automático para **Lombok** integrado a través de `mason.nvim`.
-4. **Node.js & npm**:
+5. **Node.js & npm**:
    - Requerido para utilidades web como `live-server`.
-5. **Antigravity CLI (`agy`)**:
+6. **Antigravity CLI (`agy`)**:
    - Instalado en `$PATH` para comandos interactivos y análisis de código.
-6. **GitHub CLI (`gh`)**:
+7. **GitHub CLI (`gh`)**:
    - Autenticado (`gh auth login`) para el funcionamiento de `octo.nvim`.
-7. **StyLua / Formatters**: Gestionados automáticamente mediante `mason.nvim` y `conform.nvim`.
+8. **StyLua / Formatters**: Gestionados automáticamente mediante `mason.nvim` y `conform.nvim`.
 
 ---
 
@@ -71,7 +76,8 @@ Para el funcionamiento completo de todos los módulos:
 | `lazyvim.plugins.extras.lang.java` | Soporte completo para Java mediante `nvim-jdtls`, DAP y testing |
 | `lazyvim.plugins.extras.lang.json` | Soporte de esquemas JSON con `SchemaStore` |
 | `lazyvim.plugins.extras.lang.python` | Soporte profesional para Python (`basedpyright`, `ruff`, `venv-selector`, DAP, Neotest) |
-| `lazyvim.plugins.extras.lang.toml` | Validación, autocompletado y formato para `pyproject.toml` (`taplo`) |
+| `lazyvim.plugins.extras.lang.rust` | Soporte profesional para Rust (`rustaceanvim`, `crates.nvim`, `codelldb` DAP y `neotest`) |
+| `lazyvim.plugins.extras.lang.toml` | Validación, autocompletado y formato para `Cargo.toml` y `pyproject.toml` (`taplo`) |
 | `lazyvim.plugins.extras.lang.yaml` | Validación y autocompletado para YAML |
 | `lazyvim.plugins.extras.test.core` | Ejecución y depuración de tests con `neotest` + integración con `trouble.nvim` |
 | `lazyvim.plugins.extras.util.mini-hipatterns` | Resaltado de colores hexadecimales e hiperpatrones |
@@ -100,6 +106,31 @@ Integración independiente de Antigravity (`lua/plugins/kiro.lua`). Usa una term
 | `<leader>kr` | Normal | Abrir Kiro reanudando la última conversación del directorio (`--resume`) |
 
 Lualine muestra `🤖 Kiro` mientras la sesión de Kiro está activa. Los cambios que Kiro haga en disco se recargan con el autocmd `AgentAutoRead`.
+
+### 🦀 Rust & Gestión de Crates (`rustaceanvim` & `crates.nvim`)
+| Atajo | Modo | Descripción |
+|---|---|---|
+| `<leader>cR` | Normal (`.rs`) | Acciones de código agrupadas de `rust-analyzer` (`RustLsp codeAction`) |
+| `<leader>dr` | Normal (`.rs`) | Seleccionar y depurar ejecutable/test de Rust (`RustLsp debuggables`) |
+| `<leader>Re` | Normal (`.rs`) | Expandir macro recursivamente (`RustLsp expandMacro`) |
+| `<leader>RE` | Normal (`.rs`) | Explicar código de error actual de `rustc` (`RustLsp explainError`) |
+| `<leader>Rd` | Normal (`.rs`) | Renderizar diagnóstico completo de Cargo (`RustLsp renderDiagnostic`) |
+| `<leader>Rc` | Normal (`.rs`) | Abrir `Cargo.toml` del crate actual |
+| `<leader>RD` | Normal (`.rs` / `Cargo.toml`) | Abrir documentación externa en `docs.rs` |
+| `<leader>Rp` | Normal (`.rs`) | Navegar al módulo padre (`RustLsp parentModule`) |
+| `<leader>Rm` | Normal (`.rs`) | Reconstruir *proc-macros* (`RustLsp rebuildProcMacros`) |
+| `<leader>Rr` | Normal (`.rs` / `Cargo.toml`) | Ejecutar *runnables* de Cargo (`.rs`) / Recargar metadatos (`Cargo.toml`) |
+| `<leader>Rl` | Normal (`.rs`) | Repetir inmediatamente el último ejecutable de Cargo (`RustLsp! runnables`) |
+| `<leader>RL` | Normal (`.rs`) | Repetir inmediatamente la última sesión de depuración (`RustLsp! debuggables`) |
+| `<leader>RJ` | Normal (`.rs`) | Unir líneas inteligentemente en Rust (`RustLsp joinLines`) |
+| `<leader>Rv` / `<leader>Rf` | Normal (`Cargo.toml`) | Selector interactivo de versiones / *features* del crate (`crates.nvim`) |
+| `<leader>Ru` / `<leader>RU` | Normal / Visual (`Cargo.toml`) | Actualizar crate(s) / todos los crates en rango compatible |
+| `<leader>Ra` / `<leader>RA` | Normal / Visual (`Cargo.toml`) | Subir crate(s) / todos los crates a última versión mayor (*upgrade*) |
+| `<leader>RH` / `<leader>RR` / `<leader>RC` | Normal (`Cargo.toml`) | Abrir Homepage, Repositorio Git o ficha en `crates.io` |
+| `<leader>cn` | Normal (`.rs`) | Generar documentación `///` en formato `rustdoc` (`neogen`) |
+| `<leader>tr` / `<leader>tt` / `<leader>td` | Normal (`.rs`) | Ejecutar test cercano / archivo / depurar test con DAP (`rustaceanvim.neotest`) |
+| `<leader>uh` | Normal | Alternar *Inlay Hints* de tipos, parámetros y cadenas de métodos |
+
 ### 🐍 Python, Depuración (DAP), Testing (Neotest) y Refactoring
 | Atajo | Modo | Descripción |
 |---|---|---|
@@ -160,6 +191,20 @@ Con [lua/plugins/auto-save.lua](file:///home/rmachicm/.config/nvim/lua/plugins/a
 
 ### 🐍 Ecosistema Python Profesional (Backend, APIs y Scripting)
 En [lua/plugins/python.lua](file:///home/rmachicm/.config/nvim/lua/plugins/python.lua) y [lua/config/options.lua](file:///home/rmachicm/.config/nvim/lua/config/options.lua), se integra **basedpyright** (tipado estático, *hover* e *inlay hints*) junto con **Ruff** (LSP para diagnósticos/acciones rápidas y `conform.nvim` para `ruff_organize_imports` + `ruff_format`). Además, `nvim-lint` activa **mypy** de forma condicional únicamente cuando el proyecto incluye configuración explícita y un ejecutable en su `.venv`, mientras que `nvim-dap-python` y `neotest-python` quedan listos para trabajar con `debugpy` y `pytest`.
+
+### 🦀 Ecosistema Rust Profesional y Blindaje Anti-Colisión
+En [lua/plugins/rust.lua](file:///home/rmachicm/.config/nvim/lua/plugins/rust.lua) y [lua/config/options.lua](file:///home/rmachicm/.config/nvim/lua/config/options.lua), se potencia el extra oficial de LazyVim con **mrcjkb/rustaceanvim** (`cargo clippy --no-deps` al guardar, soporte completo de *proc-macros*, *inlay hints* calibrados y directorio aislado `target/rust-analyzer` vía `cargo.targetDir = true` para evitar bloqueos de compilación frente a `cargo run`/`test` y `auto-save.nvim`), **Saecki/crates.nvim** (LSP en memoria integrado con `blink.cmp` para versiones y *features* en `Cargo.toml`), **CodeLLDB** vía Mason para depuración DAP con *pretty-printers*, **rustaceanvim.neotest** y **neogen** (`rustdoc`). Incluye además **4 capas de blindaje activo** que deshabilitan plugins conflictivos/obsoletos (`rust-tools.nvim`, `neotest-rust`, `rust.vim`), cortocircuitan `rust_analyzer` en `nvim-lspconfig` / `mason-lspconfig` / `vim.lsp.enable` para impedir servidores duplicados y resuelven el binario directamente desde `rustup`.
+
+#### ▶️ Flujo Rápido para Ejecutar un Proyecto Rust
+1. **Ejecutar binario o ejemplo (`Cargo Runnables`)**: Presiona **`<leader>Rr`** dentro de cualquier archivo `.rs` para elegir qué binario/ejemplo correr (`cargo run --bin ...`), y **`<leader>Rl`** para **repetir la última ejecución al instante** con un solo atajo.
+2. **CodeLens directo sobre `fn main()`**: Coloca el cursor sobre `fn main()` o un test y presiona **`<leader>cc`** para disparar el *Run/Debug* contextual del LSP.
+3. **Ejecutar tests sin salir del código**: Presiona **`<leader>tr`** sobre una función `#[test]` para correr ese test, **`<leader>tt`** para todo el archivo o **`<leader>ts`** para abrir el panel lateral de resultados (`neotest`).
+4. **Depurar paso a paso (DAP + CodeLLDB)**:
+   - **Paso 1 (Breakpoints)**: Coloca el cursor en la línea donde quieras detenerte y presiona **`<leader>db`** (o **`<leader>dB`** para un breakpoint condicional, ej. `x > 10`).
+   - **Paso 2 (Iniciar Debug)**:
+     - Para depurar el binario principal o ejemplo: presiona **`<leader>dr`** (`RustLsp debuggables`) y elige el target (usa **`<leader>RL`** para repetir la última sesión sin menú).
+     - Para depurar un `#[test]` específico: coloca el cursor dentro del test y presiona **`<leader>td`**.
+   - **Paso 3 (Navegar y evaluar en vivo)**: Se abrirá automáticamente `nvim-dap-ui` con los valores en línea (*virtual text*). Usa **`<leader>dO`** (*Step Over* / siguiente línea), **`<leader>di`** (*Step Into* / entrar a función), **`<leader>do`** (*Step Out* / salir de función), **`<leader>dc`** (*Continue*), **`<leader>de`** (evaluar variable/expresión bajo el cursor) y **`<leader>dt`** (terminar sesión).
 
 ### ☕ Soporte Java con Lombok
 En [lua/plugins/java.lua](file:///home/rmachicm/.config/nvim/lua/plugins/java.lua), se detecta automáticamente la presencia de `lombok.jar` descargado por Mason y se inyecta como `-javaagent` al iniciar el servidor de lenguaje **JDTLS**, permitiendo el reconocimiento instantáneo de anotaciones como `@Getter`, `@Setter`, `@Builder`, etc.
