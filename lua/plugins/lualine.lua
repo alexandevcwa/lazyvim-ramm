@@ -32,7 +32,9 @@ local function update_cache(new_status)
     cached_status = new_status
     local ok_lualine, lualine = pcall(require, "lualine")
     if ok_lualine then
-      pcall(lualine.refresh)
+      pcall(function()
+        lualine.refresh()
+      end)
     end
   end
 end

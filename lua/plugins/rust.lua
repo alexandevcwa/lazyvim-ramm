@@ -13,6 +13,9 @@
 
 local uv = vim.uv or vim.loop
 
+--- `true` en Windows (nativo). Se usa para ajustar rutas, extensiones y parches específicos de Unix
+local is_windows = uv.os_uname().sysname:find("Windows") ~= nil
+
 ---@type table<string, boolean>
 local notified_messages = {}
 
@@ -32,13 +35,21 @@ end
 --- Capa 3 de Blindaje: Detecta si existe un binario sombra de rust-analyzer en Mason
 --- que pueda interferir en el PATH con la versión del toolchain activo de rustup.
 local function check_mason_shadow_binary()
-  local mason_ra = vim.fn.stdpath("data") .. "/mason/bin/rust-analyzer"
-  if uv.fs_stat(mason_ra) then
-    notify_once(
-      "Se detectó 'rust-analyzer' instalado en Mason (~/.local/share/nvim/mason/bin/rust-analyzer).\n"
-        .. "Ejecuta :MasonUninstall rust-analyzer para evitar conflictos de ABI con rustup.",
-      vim.log.levels.WARN
-    )
+  local base = vim.fn.stdpath("data") .. "/mason/bin/rust-analyzer"
+  -- En Windows Mason genera shims `.cmd`/`.exe`/`.ps1`; en Unix el binario no tiene extensión
+  local candidates = is_windows and { base .. ".cmd", base .. ".exe", base .. ".ps1", base } or { base }
+  for _, path in ipairs(candidates) do
+    if uv.fs_stat(path) then
+      notify_once(
+        string.format(
+          "Se detectó 'rust-analyzer' instalado en Mason (%s).\n"
+            .. "Ejecuta :MasonUninstall rust-analyzer para evitar conflictos de ABI con rustup.",
+          path
+        ),
+        vim.log.levels.WARN
+      )
+      return
+    end
   end
 end
 
@@ -91,6 +102,10 @@ local codelldb_eof_fix_installed = false
 
 --- Instala el filtro anti-EOF para `codelldb terminal-agent` en `nvim-dap`
 local function install_codelldb_eof_fix()
+  -- El parche usa `sh -c` y `/dev/null` (solo Unix); en Windows no aplica y rompería las terminales
+  if is_windows then
+    return
+  end
   if codelldb_eof_fix_installed then
     return
   end
@@ -128,7 +143,7 @@ end
 ---@return string|nil liblldb_path
 local function resolve_codelldb_paths()
   local ext_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/"
-  local codelldb_path = ext_path .. "adapter/codelldb"
+  local codelldb_path = ext_path .. "adapter/codelldb" .. (is_windows and ".exe" or "")
   if not uv.fs_stat(codelldb_path) then
     return nil, nil
   end
